@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.emoji.bundled.BundledEmojiCompatConfig;
+import androidx.emoji.text.EmojiCompat;
 import androidx.fragment.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -39,6 +41,11 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private boolean initialStart = true;
     private Connected connected = Connected.False;
 
+    private TextView heartbeatStatus;
+    private CharSequence blackHeart;
+    private CharSequence redHeart;
+
+
     /*
      * Lifecycle
      */
@@ -48,6 +55,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         setHasOptionsMenu(true);
         setRetainInstance(true);
         deviceAddress = getArguments().getString("device");
+
+        EmojiCompat.Config config = new BundledEmojiCompatConfig(this.getContext());
+        EmojiCompat.init(config);
     }
 
     @Override
@@ -123,6 +133,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         TextView sendText = view.findViewById(R.id.send_text);
         View sendBtn = view.findViewById(R.id.send_btn);
         sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
+        heartbeatStatus = view.findViewById(R.id.heartbeat_status);
         return view;
     }
 

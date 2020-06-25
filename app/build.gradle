@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         targetSdkVersion 28
-        minSdkVersion 18
+        minSdkVersion 19
         vectorDrawables.useSupportLibrary true
 
         applicationId "de.kai_morich.simple_bluetooth_le_terminal"
@@ -26,4 +26,8 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
+    implementation "com.android.support:support-emoji:28.0.0"
+    implementation "com.android.support:support-emoji-appcompat:$version"
+    implementation "com.android.support:support-emoji-bundled:$version"
+
 }
