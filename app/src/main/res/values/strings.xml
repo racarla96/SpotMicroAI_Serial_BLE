@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">BLE Serial Spot Calibrator</string>
     <string name="devices">Bluetooth LE Devices</string>
+    <string name="servo_config_activity_title">Servo Config</string>
 
     <string name="location_permission_title">Location permission required</string>
     <string name="location_permission_message">This app does not use location information, but scanning for Bluetooth LE devices requires this permission</string>
@@ -12,4 +13,6 @@
     <string name="black_heart">&#x1F5A4;</string>
     <string name="red_heart">&#x2764;</string>
 
+    <string name="console_mode">Console Mode</string>
+    <string name="servo_mode">Servo Mode</string>
 </resources>

@@ -8,4 +8,9 @@
         <item>\u000a</item>
         <item>\u000d\u000a</item>
     </string-array>
+    <string-array name="q_yn_names">
+        <item>yes</item>
+        <item>no</item>
+    </string-array>
+
 </resources>

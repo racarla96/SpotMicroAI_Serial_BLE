@@ -7,6 +7,15 @@
         android:title="Clear"
         app:showAsAction="always" />
     <item
+        android:id="@+id/view_mode"
+        android:title="@string/console_mode" />
+    <item
         android:id="@+id/newline"
         android:title="Newline Mode" />
+    <item
+        android:id="@+id/message_info"
+        android:title="Message Struct Info" />
+    <item
+        android:id="@+id/clear_pref"
+        android:title="Clear Preferences" />
 </menu>

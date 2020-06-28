@@ -23,6 +23,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ServoConfigActivity"
+            android:label="@string/servo_config_activity_title"
+            android:theme="@style/AppThemeBar">
+        </activity>
         <service android:name=".SerialService" />
     </application>
 

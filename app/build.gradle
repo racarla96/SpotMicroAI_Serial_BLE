@@ -29,5 +29,5 @@ dependencies {
     implementation "com.android.support:support-emoji:28.0.0"
     implementation "com.android.support:support-emoji-appcompat:$version"
     implementation "com.android.support:support-emoji-bundled:$version"
-
+    implementation 'com.crystal:crystalrangeseekbar:1.1.3'
 }
