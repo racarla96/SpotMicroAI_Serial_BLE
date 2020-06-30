@@ -29,9 +29,11 @@ import java.util.List;
 public class ServoAdapter extends RecyclerView.Adapter<ServoAdapter.ServoHolder> {
 
     private List<Servo> dataSet;
+    private static ServoListener tf;
 
-    public ServoAdapter(List<Servo> data) {
+    public ServoAdapter(List<Servo> data, ServoListener terminalFragment) {
         this.dataSet = data;
+        this.tf = terminalFragment;
     }
 
 
@@ -112,6 +114,7 @@ public class ServoAdapter extends RecyclerView.Adapter<ServoAdapter.ServoHolder>
                 public void finalValue(Number value) {
                     // Callback for send value
                     if(sv != null) sv.setValue(value.intValue());
+                    if(sv != null) tf.sendServoValue(sv.getPosition(), value.intValue());
                 }
             });
         }

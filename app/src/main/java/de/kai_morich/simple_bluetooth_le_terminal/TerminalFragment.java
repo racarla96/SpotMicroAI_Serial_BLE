@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.emoji.bundled.BundledEmojiCompatConfig;
 import androidx.emoji.text.EmojiCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,10 +39,13 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
-public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
+public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener, ServoListener {
 
     private enum Connected { False, Pending, True }
 
@@ -63,6 +67,10 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private ServoAdapter servoAdapter;
     private List<Servo> servoList;
     private final int number_servos = 16;
+
+    private Timer timerObj;
+    private TimerTask timerTaskObj;
+    private final String HEARTBEAT_MESSAGE = "@H@";
 
     /*
      * Lifecycle
@@ -97,6 +105,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     @Override
     public void onStop() {
+
+
         if(service != null && !getActivity().isChangingConfigurations())
             service.detach();
         super.onStop();
@@ -143,20 +153,23 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        int _position = data.getIntExtra("id", Servo.def_position);
-        boolean _enable = data.getBooleanExtra("enable", Servo.def_enable);
-        String _name = data.getStringExtra("name");
-        int _min = data.getIntExtra("min", Servo.def_min_value);
-        int _mid = data.getIntExtra("mid", Servo.def_mid_value);
-        int _max = data.getIntExtra("max", Servo.def_max_value);
+        if(resultCode == RESULT_OK) {
+            int _position = data.getIntExtra("id", Servo.def_position);
+            boolean _enable = data.getBooleanExtra("enable", Servo.def_enable);
+            String _name = data.getStringExtra("name");
+            int _min = data.getIntExtra("min", Servo.def_min_value);
+            int _mid = data.getIntExtra("mid", Servo.def_mid_value);
+            int _max = data.getIntExtra("max", Servo.def_max_value);
 
-        servoList.get(_position).setName(_name);
-        servoList.get(_position).setEnable(_enable);
-        servoList.get(_position).setMin(_min);
-        servoList.get(_position).setMid(_mid);
-        servoList.get(_position).setMax(_max);
+            servoList.get(_position).setName(_name);
+            servoList.get(_position).setEnable(_enable);
+            servoList.get(_position).setMin(_min);
+            servoList.get(_position).setMid(_mid);
+            servoList.get(_position).setMax(_max);
 
-        servoAdapter.notifyItemRangeChanged(_position,1);
+            servoAdapter.notifyItemRangeChanged(_position, 1);
+            sendServoConfig(_position, _enable, _min, _mid, _max);
+        }
     }
 
     /*
@@ -172,7 +185,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         View sendBtn = view.findViewById(R.id.send_btn);
         sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
 
-        heartbeatStatus = view.findViewById(R.id.heartbeat_status);
         view_mode = view.findViewById(R.id.view_mode);
         console_mode = view.findViewById(R.id.console_layout);
 
@@ -184,8 +196,26 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         servoList = new ArrayList<Servo>();
         for (int i = 0; i < number_servos; i++)
             servoList.add(new Servo(view.getContext(), i));
-        servoAdapter = new ServoAdapter(servoList);
+        servoAdapter = new ServoAdapter(servoList, this);
         servoRV.setAdapter(servoAdapter);
+
+        heartbeatStatus = view.findViewById(R.id.heartbeat_status);
+        timerObj = new Timer();
+        timerTaskObj = new TimerTask() {
+            public void run() {
+                //perform your action here
+                FragmentActivity f = getActivity();
+                if (f != null) {
+                    f.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            heartbeatStatus.setText(getString(R.string.black_heart));
+                        }
+                    });
+                }
+            }
+        };
+        timerObj.schedule(timerTaskObj, 0, 1000);
 
         swapModeView();
         return view;
@@ -212,7 +242,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        System.out.println("mmmm");
         int id = item.getItemId();
         if (id == R.id.clear) {
             receiveText.setText("");
@@ -304,13 +333,27 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void receive(byte[] data) {
-        receiveText.append(new String(data));
+        String in = new String(data);
+        receiveText.append(in);
+        if(in.equals(HEARTBEAT_MESSAGE))
+            heartbeatStatus.setText(getString(R.string.red_heart));
     }
 
     private void status(String str) {
         SpannableStringBuilder spn = new SpannableStringBuilder(str+'\n');
         spn.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorStatusText)), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         receiveText.append(spn);
+    }
+
+    public void sendServoValue(int id, int value) {
+        if(connected != Connected.True) return;
+        send("@" + id + ":" + value + "@");
+    }
+
+    public void sendServoConfig(int id, boolean enable, int min, int mid, int max) {
+        if(connected != Connected.True) return;
+        int en = enable ? 1 : 0;
+        send("@" + id + ":" + en + ":" + min + ":" + mid + ":" + max + "@");
     }
 
     /*

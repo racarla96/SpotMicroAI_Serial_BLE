@@ -1,9 +1,14 @@
 package de.kai_morich.simple_bluetooth_le_terminal;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -39,7 +44,6 @@ public class ServoConfigActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
         boolean _enable = Servo.def_enable;
         String _name = "";
         int _min = Servo.def_min_value;
@@ -54,15 +58,22 @@ public class ServoConfigActivity extends AppCompatActivity {
             _max = Integer.parseInt(String.valueOf(max.getText()));
         } catch (Exception e){}
 
-        Intent intent = new Intent();
-        intent.putExtra("id", position);
-        intent.putExtra("enable", _enable);
-        intent.putExtra("name", _name);
-        intent.putExtra("min", _min);
-        intent.putExtra("mid", _mid);
-        intent.putExtra("max", _max);
-        setResult(0, intent); // You can also send result without any data using setResult(int resultCode)
-        finish();
+        if(_min > _mid  ||  _mid > _max) {
+            Toast.makeText(ServoConfigActivity.this.getApplicationContext(), "Error settings!", Toast.LENGTH_SHORT).show();
+            setResult(RESULT_CANCELED); // You can also send result without any data using setResult(int resultCode)
+            finish();
+        } else {
+            Toast.makeText(ServoConfigActivity.this.getApplicationContext(), "Settings saved!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent();
+            intent.putExtra("id", position);
+            intent.putExtra("enable", _enable);
+            intent.putExtra("name", _name);
+            intent.putExtra("min", _min);
+            intent.putExtra("mid", _mid);
+            intent.putExtra("max", _max);
+            setResult(RESULT_OK, intent); // You can also send result without any data using setResult(int resultCode)
+            finish();
+        }
     }
 
 }
